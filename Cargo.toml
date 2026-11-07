@@ -1,0 +1,50 @@
+[package]
+name = "audiotomidi"
+version = "0.1.0"
+edition = "2021"
+description = "Audio to MIDI converter plugin (VST3 / CLAP) with drag-and-drop MIDI export"
+license = "GPL-3.0-or-later"
+
+[workspace]
+members = ["xtask"]
+
+[lib]
+# `lib` is needed for the standalone binary and for unit tests
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name = "audiotomidi_standalone"
+path = "src/main.rs"
+required-features = ["standalone"]
+
+[features]
+# A standalone app (JACK/ALSA/CoreAudio/WASAPI) for quick testing without a DAW
+standalone = ["nih_plug/standalone"]
+
+[dependencies]
+nih_plug = { git = "https://github.com/robbert-vdh/nih-plug.git" }
+nih_plug_egui = { git = "https://github.com/robbert-vdh/nih-plug.git" }
+
+parking_lot = "0.12"
+atomic_float = "1"
+rtrb = "0.3"
+realfft = "3"
+midly = "0.5"
+serde = { version = "1", features = ["derive"] }
+symphonia = { version = "0.5", default-features = false, features = ["wav", "pcm", "flac", "mp3", "ogg", "vorbis", "aiff", "adpcm"] }
+rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "async-std"] }
+png = "0.17"
+pollster = "0.4"
+
+[target.'cfg(any(target_os = "windows", target_os = "macos"))'.dependencies]
+drag = "2.1"
+raw-window-handle = "0.6"
+
+[profile.release]
+lto = "thin"
+strip = "symbols"
+
+[profile.profiling]
+inherits = "release"
+debug = true
+strip = "none"
